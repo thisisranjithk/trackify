@@ -1,8 +1,10 @@
 "use client";
+import ErrorMessage from "@/app/components/common/ErrorMessage";
+import Spinner from "@/app/components/common/Spinner";
 import { successMessage } from "@/utils/toastHelper";
 import { createIssueSchema } from "@/utils/validationSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Text, TextField } from "@radix-ui/themes";
+import { Button, TextField } from "@radix-ui/themes";
 import axios from "axios";
 import "easymde/dist/easymde.min.css";
 import dynamic from "next/dynamic";
@@ -49,11 +51,7 @@ const NewIssue = () => {
         placeholder="Title"
         {...register("title")}
       ></TextField.Root>
-      {errors.title && (
-        <Text color="red" as="p" className="pb-2">
-          {errors.title.message}
-        </Text>
-      )}
+      <ErrorMessage>{errors.title?.message}</ErrorMessage>
       <Controller
         name="description"
         control={control}
@@ -61,11 +59,7 @@ const NewIssue = () => {
           <SimpleMDE placeholder="Description" {...field} />
         )}
       />
-      {errors.description && (
-        <Text color="red" as="p" className="pb-2">
-          {errors.description.message}
-        </Text>
-      )}
+      <ErrorMessage>{errors.description?.message}</ErrorMessage>
       <div>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Submitting..." : "Create Issue"}
