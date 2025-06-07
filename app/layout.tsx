@@ -2,6 +2,7 @@ import { Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import type { Metadata } from "next";
 import { Inter, Montserrat } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import Navbar from "./Navbar";
 
@@ -34,6 +35,7 @@ export default function RootLayout({
           <Navbar />
           <main className="px-5 max-w-[1440px] mx-auto">{children}</main>
         </Theme>
+        <Toaster position="top-right" />
       </body>
     </html>
   );
