@@ -1,24 +1,24 @@
 "use client";
 import { ErrorMessage, Spinner } from "@/app/components/common";
-import { deletedMessage, successMessage } from "@/utils/toastHelper";
+import { successMessage } from "@/utils/toastHelper";
 import { createIssueSchema } from "@/utils/validationSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
+import { UpdateIcon } from "@radix-ui/react-icons";
 import { Button, Flex, TextField } from "@radix-ui/themes";
 import axios from "axios";
 import "easymde/dist/easymde.min.css";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { IssueForm } from "../../new/page";
+import DeleteIssue from "./DeleteIssue";
 const SimpleMDE = dynamic(() => import("react-simplemde-editor"), {
   ssr: false,
 });
 
 const EditIssue = () => {
   const { id } = useParams();
-  const [deleteLoading, setDeleteLoading] = useState(false);
   const navigate = useRouter();
   const {
     register,
@@ -26,7 +26,6 @@ const EditIssue = () => {
     handleSubmit,
     formState: { isSubmitting, errors },
     reset,
-    watch,
   } = useForm<IssueForm>({
     resolver: zodResolver(createIssueSchema),
   });
@@ -62,23 +61,6 @@ const EditIssue = () => {
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    try {
-      setDeleteLoading(true);
-      const res = await axios.delete(`/api/issues/${id}/edit`);
-      if (res.data.success) {
-        deletedMessage(res.data.message);
-        reset();
-        setDeleteLoading(false);
-        navigate.push("/issues");
-      }
-    } catch (error) {
-      setDeleteLoading(false);
-      console.log(error);
-    }
-  };
-
   return (
     <form
       className="max-w-xl flex flex-col space-y-4"
@@ -102,14 +84,7 @@ const EditIssue = () => {
           <UpdateIcon />
           Update {isSubmitting && <Spinner />}
         </Button>
-        <Button
-          color="red"
-          disabled={deleteLoading}
-          onClick={(e) => handleDelete(e)}
-        >
-          <TrashIcon />
-          Delete {deleteLoading && <Spinner />}
-        </Button>
+        <DeleteIssue issueId={Number(id)} reset={reset} />
       </Flex>
     </form>
   );
