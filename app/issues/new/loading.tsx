@@ -1,11 +1,16 @@
-import { Spinner } from "@radix-ui/themes";
+import { Box, Button } from "@radix-ui/themes";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const NewIssueLoading = () => {
   return (
-    <p>
-      Loading...
-      <Spinner size="2" />
-    </p>
+    <Box className="max-w-xl flex flex-col space-y-4">
+      <Skeleton height="2rem" className="mb-4" />
+      <Skeleton height="15rem" className="mb-4" />
+      <div>
+        <Button>Create Issue</Button>
+      </div>
+    </Box>
   );
 };
 
