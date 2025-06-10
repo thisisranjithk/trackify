@@ -3,20 +3,23 @@ import { ErrorMessage, Spinner } from "@/app/components/common";
 import { successMessage } from "@/utils/toastHelper";
 import { createIssueSchema } from "@/utils/validationSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, TextField } from "@radix-ui/themes";
+import { UpdateIcon } from "@radix-ui/react-icons";
+import { Button, Flex, TextField } from "@radix-ui/themes";
 import axios from "axios";
 import "easymde/dist/easymde.min.css";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
-import z from "zod";
+import { IssueForm } from "../../new/page";
+import DeleteIssue from "./DeleteIssue";
 const SimpleMDE = dynamic(() => import("react-simplemde-editor"), {
   ssr: false,
 });
 
-export type IssueForm = z.infer<typeof createIssueSchema>;
-
-const NewIssue = () => {
+const EditIssue = () => {
+  const { id } = useParams();
+  const navigate = useRouter();
   const {
     register,
     control,
@@ -26,12 +29,29 @@ const NewIssue = () => {
   } = useForm<IssueForm>({
     resolver: zodResolver(createIssueSchema),
   });
-  const navigate = useRouter();
 
-  const onFormSubmit = async (data: IssueForm) => {
+  useEffect(() => {
+    const fetchIssue = async () => {
+      try {
+        const res = await axios.get(`/api/issues/${id}`);
+        const issue = res.data.data;
+
+        // Set the data in form
+        reset({
+          title: issue.title,
+          description: issue.description,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchIssue();
+  }, [id]);
+
+  const onUpdateIssue = async (data: IssueForm) => {
     try {
-      const res = await axios.post("/api/issues", data);
-      if (res.status === 201) {
+      const res = await axios.put(`/api/issues/${id}/edit`, data);
+      if (res.data.success) {
         successMessage(res.data.message);
         reset();
         navigate.push("/issues");
@@ -44,7 +64,7 @@ const NewIssue = () => {
   return (
     <form
       className="max-w-xl flex flex-col space-y-4"
-      onSubmit={handleSubmit(onFormSubmit)}
+      onSubmit={handleSubmit(onUpdateIssue)}
     >
       <TextField.Root
         placeholder="Title"
@@ -59,13 +79,15 @@ const NewIssue = () => {
         )}
       />
       <ErrorMessage>{errors.description?.message}</ErrorMessage>
-      <div>
+      <Flex gap="4">
         <Button type="submit" disabled={isSubmitting}>
-          Create Issue {isSubmitting && <Spinner />}
+          <UpdateIcon />
+          Update {isSubmitting && <Spinner />}
         </Button>
-      </div>
+        <DeleteIssue issueId={Number(id)} reset={reset} />
+      </Flex>
     </form>
   );
 };
 
-export default NewIssue;
+export default EditIssue;
